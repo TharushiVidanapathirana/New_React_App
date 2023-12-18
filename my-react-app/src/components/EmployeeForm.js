@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
 import './EmployeeForm.css';
 
 const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
@@ -10,7 +9,6 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-
     fetchDepartments();
   }, []);
 
@@ -39,7 +37,6 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
   };
 
   const handleFormClose = () => {
-  
     setEmployee({});
     onClose();
   };
@@ -53,26 +50,36 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
 
       const isNewEmployee = !employee.EmployeeId;
 
+      if (
+        !employee.FirstName ||
+        !employee.LastName ||
+        !employee.Email ||
+        !employee.DateOfBirth ||
+        !employee.Salary ||
+        !employee.Department
+      ) {
+        setError('Please fill in all fields.');
+        return;
+      }
+
       const data = {
-       
+        EmployeeId: employee.EmployeeId,
         FirstName: employee.FirstName,
         LastName: employee.LastName,
         Email: employee.Email,
         DateOfBirth: employee.DateOfBirth,
         Age: calculateAge(employee.DateOfBirth),
         Salary: parseInt(employee.Salary),
-        Department: employee.Department,
+        Department: parseInt(employee.Department),
       };
 
       if (isNewEmployee) {
-       
         await axios.post('https://localhost:44308/api/Employee', data);
       } else {
-        
-        await axios.put('https://localhost:44308/api/Employee', data);
+        // Use the correct endpoint for updating an existing employee
+        await axios.put(`https://localhost:44308/api/Employee/${employee.EmployeeId}`, data);
       }
 
-     
       handleFormClose();
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -134,11 +141,7 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
 
         <label>
           Age:
-          <input
-            type="text"
-            value={calculateAge(employee.DateOfBirth)}
-            disabled
-          />
+          <input type="text" value={calculateAge(employee.DateOfBirth)} disabled />
         </label>
 
         <label>
@@ -164,10 +167,10 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
               Select Department
             </option>
             {departments.map((department) => (
-  <option key={department.DepartmentId} value={department.DepartmentId}>
-    {department.DepartmentName}
-  </option>
-))}
+              <option key={department.DepartmentId} value={department.DepartmentId}>
+                {department.DepartmentName}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -183,3 +186,4 @@ const EmployeeForm = ({ employee: initialEmployee, onClose }) => {
 };
 
 export default EmployeeForm;
+

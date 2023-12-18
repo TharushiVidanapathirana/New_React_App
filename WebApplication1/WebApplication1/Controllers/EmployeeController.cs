@@ -78,35 +78,50 @@ namespace WebApplication1.Controllers
         public string Put(Employee emp)
         {
             try
-            {string query = @"
-    UPDATE dbo.Employee SET
-    
-    FirstName='" + emp.FirstName + @"',
-    LastName='" + emp.LastName + @"',
-    Email='" + emp.Email + @"',
-    DateOfBirth='" + emp.DateOfBirth + @"',
-    Age=" + emp.Age + @",
-    Salary=" + emp.Salary + @",
-    Department=" + emp.Department + @"
-    WHERE EmployeeId=" + emp.EmployeeId + @"
-";
+            {
+                string query = @"
+            UPDATE dbo.Employee
+            SET
+                FirstName = @FirstName,
+                LastName = @LastName,
+                Email = @Email,
+                DateOfBirth = @DateOfBirth,
+                Age = @Age,
+                Salary = @Salary,
+                Department = @Department
+            WHERE EmployeeId = @EmployeeId
+        ";
 
-
-                DataTable table = new DataTable();
-                using (var con = new SqlConnection(ConfigurationManager.
-                    ConnectionStrings["EmployeeAppDB"].ConnectionString))
+                using (var con = new SqlConnection(ConfigurationManager.ConnectionStrings["EmployeeAppDB"].ConnectionString))
                 using (var cmd = new SqlCommand(query, con))
-                using (var da = new SqlDataAdapter(cmd))
                 {
+                    con.Open();
                     cmd.CommandType = CommandType.Text;
-                    da.Fill(table);
-                }
 
-                return "Updated Successfully!!";
+                    // Set parameters with values from the Employee object
+                    cmd.Parameters.AddWithValue("@FirstName", emp.FirstName);
+                    cmd.Parameters.AddWithValue("@LastName", emp.LastName);
+                    cmd.Parameters.AddWithValue("@Email", emp.Email);
+                    cmd.Parameters.AddWithValue("@DateOfBirth", emp.DateOfBirth);
+                    cmd.Parameters.AddWithValue("@Age", emp.Age);
+                    cmd.Parameters.AddWithValue("@Salary", emp.Salary);
+                    cmd.Parameters.AddWithValue("@Department", emp.Department);
+                    cmd.Parameters.AddWithValue("@EmployeeId", emp.EmployeeId);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+
+                    if (rowsAffected > 0)
+                    {
+                        return "Updated Successfully!!";
+                    }
+                    else
+                    {
+                        return "No records were updated.";
+                    }
+                }
             }
             catch (Exception)
             {
-
                 return "Failed to Update!!";
             }
         }
